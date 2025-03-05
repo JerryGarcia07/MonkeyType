@@ -22,10 +22,47 @@ function initGame() {
     .map((word, index) => {
       const letters = word.split("");
 
-      return `<word>${letters
-        .map((letter) => `<letter>${letter}</letter>`)
-        .join("")}</word> `;
+      return `<word>
+        ${letters.map((letter) => `<letter>${letter}</letter>`).join("")}
+      </word>
+      `;
     })
     .join("");
+
+  const $firsWord = $paragraph.querySelector("word");
+  $firsWord.classList.add("active");
+  $firsWord.querySelector("letter").classList.add("active");
+
+  const intervalId = setInterval(() => {
+    currenTime--;
+    $time.textContent = currenTime;
+
+    if (currenTime === 0) {
+      clearInterval(intervalId);
+      console.log("game over");
+    }
+  }, 1000);
 }
-function initEvents() {}
+function initEvents() {
+  document.addEventListener("keydown", () => {
+    $imput.focus();
+  });
+  $imput.addEventListener("keydown", onkeyDown);
+  $imput.addEventListener("keyup", onkeyUp);
+}
+
+function onkeyDown() {}
+function onkeyUp() {
+  //recuperamops los elementos actuales
+  const $currentWord = $paragraph.querySelector("word.active");
+  const $currentLetter = $currentWord.querySelector("letter.active");
+  console.log($currentLetter);
+
+  const currentWord = $currentLetter.innerText.trim();
+  $imput.maxLength = currentWord.length;
+  console.log({ value: $imput.value, currentWord });
+}
+
+function gameOver() {
+  console.log("game over");
+}
