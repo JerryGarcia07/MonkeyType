@@ -17,7 +17,7 @@ function initGame() {
   words = TEXT.split(" ").slice(0, 32);
   currenTime = INITIAL_TIME;
 
-  $time.innerHTML = currenTime;
+  $time.textContent = currenTime;
   $paragraph.innerHTML = words
     .map((word, index) => {
       const letters = word.split("");
@@ -56,9 +56,8 @@ function onkeyUp() {
   //recuperamops los elementos actuales
   const $currentWord = $paragraph.querySelector("word.active");
   const $currentLetter = $currentWord.querySelector("letter.active");
-  console.log($currentLetter);
 
-  const currentWord = $currentLetter.innerText.trim();
+  const currentWord = $currentWord.innerText.trim();
   $imput.maxLength = currentWord.length;
   console.log({ value: $imput.value, currentWord });
 }
