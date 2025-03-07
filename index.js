@@ -1,11 +1,16 @@
+import { words as INITIAL_WORDS } from "./data.js";
+
 const $time = document.querySelector("time");
 const $paragraph = document.querySelector("p");
 const $imput = document.querySelector("input");
 
-const INITIAL_TIME = 30;
+const $game = document.querySelector("#game");
+const $results = document.querySelector("#results");
+const $wpm = $results.querySelector("#results-wpm");
+const $accuracy = $results.querySelector("#results-accuracy");
+const $button = document.querySelector("#reload-button");
 
-const TEXT =
-  "the quick brown fox jumps over the lazy dog and miduev is trying to clone monkey type for fun and profit using vanilla js for the typing test speed";
+const INITIAL_TIME = 30;
 
 let words = [];
 let currenTime = INITIAL_TIME;
@@ -14,7 +19,11 @@ initGame();
 initEvents();
 
 function initGame() {
-  words = TEXT.split(" ").slice(0, 32);
+  $game.style.display = "flex";
+  $results.style.display = "none";
+  $imput.value = "";
+
+  words = INITIAL_WORDS.toSorted(() => Math.random() - 0.5).slice(0, 50);
   currenTime = INITIAL_TIME;
 
   $time.textContent = currenTime;
@@ -39,7 +48,7 @@ function initGame() {
 
     if (currenTime === 0) {
       clearInterval(intervalId);
-      console.log("game over");
+      gameOver();
     }
   }, 1000);
 }
@@ -49,6 +58,7 @@ function initEvents() {
   });
   $imput.addEventListener("keydown", onkeyDown);
   $imput.addEventListener("keyup", onkeyUp);
+  $button.addEventListener("click", initGame);
 }
 
 function onkeyDown(event) {
@@ -74,6 +84,34 @@ function onkeyDown(event) {
 
     const classToAdd = hasMissedLetters ? "marked" : "correct";
     $currentWord.classList.add(classToAdd);
+    return;
+  }
+  if (key === "Backspace") {
+    const $prevWord = $currentWord.previousElementSibling;
+    const $prevLetter = $currentLetter.previousElementSibling;
+    if (!$prevWord && !$prevLetter) {
+      event.preventDefault();
+      return;
+    }
+
+    const $wordMarked = $paragraph.querySelector("word.marked");
+    if ($wordMarked && !$prevLetter) {
+      event.preventDefault();
+      $prevWord.classList.remove("marked");
+      $prevWord.classList.add("active");
+
+      const $letterToGo = $prevWord.querySelector("letter:last-child");
+
+      $currentLetter.classList.remove("active");
+      $letterToGo.classList.add("active");
+      $imput.value = [
+        ...$prevWord.querySelectorAll("letter.correct, letter.incorrect"),
+      ]
+        .map(($el) => {
+          return $el.classList.contains("correct") ? $el.innerText : "*";
+        })
+        .join("");
+    }
   }
 }
 function onkeyUp() {
@@ -111,5 +149,18 @@ function onkeyUp() {
 }
 
 function gameOver() {
-  console.log("game over");
+  $game.style.display = "none";
+  $results.style.display = "flex";
+  const correctWords = $paragraph.querySelectorAll("word.correct").length;
+  const correctLetter = $paragraph.querySelectorAll("letter.correct").length;
+  const incorrectLetter =
+    $paragraph.querySelectorAll("letter.incorrect").length;
+
+  const totalLetters = correctLetter + incorrectLetter;
+
+  const accuracy = totalLetters > 0 ? (correctLetter / totalLetters) * 100 : 0;
+
+  const wpm = (correctWords * 60) / INITIAL_TIME;
+  $wpm.textContent = wpm;
+  $accuracy.textContent = `${accuracy.toFixed(2)}%`;
 }
